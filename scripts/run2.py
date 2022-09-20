@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 
 ## include packages
-import commands
+# import commands
 import subprocess # execute commands
 import sys    # parse user input
 import signal # bind interrupt handler
@@ -67,9 +67,10 @@ class GetOutOfLoop(Exception):
 def copy_file(f):
     global mac_num
     assert(mac_num <= len(mac_set))
-    for i in xrange(mac_num):
+    for i in range(mac_num):
         host = mac_set[i]
         print_with_tag("copy","To %s" % host)
+        print(["scp", "./%s" % f, "%s:%s" % (host,"~")])
         subprocess.call(["scp", "./%s" % f, "%s:%s" % (host,"~")])
 
 
@@ -124,14 +125,15 @@ def parse_input():
     if (len(sys.argv)) > 2: ## exe file name
         exe = sys.argv[2]
     if (len(sys.argv)) > 3: ## program specified args
-        args = sys.argv[3]
+        arg = sys.argv[3]
     if (len(sys.argv)) > 4:
         bench = sys.argv[4]
     if (len(sys.argv)) > 5:
         mac_num = int(sys.argv[5])
-    args += (" -p %d" % mac_num)
+    arg += (" -p %d" % mac_num)
 
-    base_cmd = (BASE_CMD % (exe, bench, config_file)) + " --id %d " + args
+    base_cmd = (BASE_CMD % (exe, bench, config_file)) + " --id %d " + arg
+    print(base_cmd)
     return
 
 
@@ -163,26 +165,27 @@ def parse_hosts(f):
     # parse hosts
     for e in root.find("macs").findall("a"):
         server = e.text.strip()
-        if not black_list.has_key(server):
+        if black_list.get(server) == None:
+        # if not black_list.has_key(server):
             mac_set.append(server)
     return
 
 def start_servers(macset, config, bcmd,num):
     assert(len(macset) >= num)
-    for i in xrange(1,num):
+    for i in range(1,num):
         cmd = (bcmd % (i)) + OUTPUT_CMD_LOG ## disable remote output
         subprocess.call(["ssh","-n","-f",macset[i],"rm *.log"]) ## clean remaining log
         subprocess.call(["ssh", "-n","-f", macset[i], cmd])
     ## local process is executed right here
     ## cmd = "perf stat " + (bcmd % 0)
     cmd = bcmd % 0
-    print cmd
+    print(cmd)
     subprocess.call(cmd.split()) ## init local command for debug
     #subprocess.call(["ssh","-n","-f",macset[0],cmd])
     return
 
 def prepare_files(files):
-    print "Start preparing start file"
+    print("Start preparing start file")
     global mac_num
 
     cached_file_stat = {}
@@ -192,14 +195,14 @@ def prepare_files(files):
         cache.close()
     except:
         pass
-    if not cached_file_stat.has_key("mac_num"):
+    if cached_file_stat.get("mac_num") == None:
         cached_file_stat["mac_num"] = -1
-    print cached_file_stat
+    print(cached_file_stat)
 
     need_copy = False
     for f in files:
         ## check whether file has changed or not
-        if cached_file_stat.has_key(f) \
+        if cached_file_stat.get(f) != None \
            and cached_file_stat[f] == os.stat(f).st_mtime \
            and cached_file_stat["mac_num"] >= mac_num:
             continue
@@ -209,7 +212,7 @@ def prepare_files(files):
     for f in files:
         copy_file(f)
 
-    cache = open("run2.cache","w")
+    cache = open("run2.cache","wb")
     cached_file_stat["mac_num"] = mac_num
     pickle.dump(cached_file_stat,cache)
     cache.close()
@@ -225,12 +228,12 @@ def main():
     parse_input() ## parse input from command line
     #parse_bench_parameters(config_file) ## parse bench parameter from config file
     parse_hosts("hosts.xml")
-    print "[START] Input parsing done."
+    print("[START] Input parsing done.")
 
     #kill_servers(exe)
     prepare_files([exe,config_file,"hosts.xml"])    ## copy related files to remote
 
-    print "[START] cleaning remaining processes."
+    print("[START] cleaning remaining processes.")
 
     time.sleep(1) ## ensure that all related processes are cleaned
 

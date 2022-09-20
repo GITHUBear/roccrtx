@@ -20,7 +20,7 @@ class bcolors:
 
 def print_with_tag(tag,s):
     tag = bcolors.wrap_text_with_color(tag,bcolors.OKRED)
-    print "[%s] %s" % (tag,s)
+    print("[%s] %s" % (tag,s))
 
 
 class PrintTee(object):
