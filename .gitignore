@@ -1,0 +1,11 @@
+build
+build/*
+third_party
+third_party/*
+src/rocc_config.h
+src/tx_config.h
+settings.json
+scripts/noccocc
+scripts/run2.cache
+scripts/__pycache__
+scripts/results/*

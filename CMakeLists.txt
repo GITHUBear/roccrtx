@@ -33,8 +33,8 @@ set(CMAKE_SKIP_INSTALL_ALL_DEPENDENCY true)
 set (MACRO_FLAGS "-DBASE_LINE")
 
 ## currently drtm in this codebase is not supported, i will fix this later 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DLEVELDB_PLATFORM_POSIX -pthread -DOS_LINUX -mrtm -pthread -O2 -g ${MACRO_FLAGS}")
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DLEVELDB_PLATFORM_POSIX -pthread -DOS_LINUX -mrtm -pthread  -O0 -g2 ${MACRO_FLAGS}")
+##set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DLEVELDB_PLATFORM_POSIX -pthread -DOS_LINUX -mrtm -pthread -O2 -g ${MACRO_FLAGS}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DLEVELDB_PLATFORM_POSIX -pthread -DOS_LINUX -mrtm -pthread  -O0 -g2 ${MACRO_FLAGS}")
 
 ## TODO, we shall replace it with a pre-complied lib, but since now the lib is not stable, so we just add sources here
 file(GLOB RDMA_SOURCES "third_party/rdma_lib/src/*.cc" "third_party/micautil/*.cc")

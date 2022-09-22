@@ -79,7 +79,7 @@ def kill_servers(e):
     kill_cmd1 = "pkill %s --signal 2" % e
     # real kill
     kill_cmd2 = "pkill %s" % e
-    for i in xrange(mac_num):
+    for i in range(mac_num):
         subprocess.call(["ssh", "-n","-f", mac_set[i], kill_cmd1])
         time.sleep(1)
         try:
@@ -239,7 +239,7 @@ def main():
 
     signal.signal(signal.SIGINT, signal_int_handler) ## register signal interrupt handler
     start_servers(mac_set, config_file, base_cmd,mac_num) ## start server processes
-    for i in xrange(10):
+    for i in range(10):
         ## forever loop
         time.sleep(10)
     signal_int_handler(0,1) ## 0,1 are dummy args

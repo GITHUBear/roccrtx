@@ -93,3 +93,9 @@ A template host file(host.xml) is presented in the scripts, which states for mac
 **We will soon make a detailed description and better configuration tools for ROCC**.
 
 ***
+
+**Debug:**
+
+```
+set args --bench micro --txn-flags 1  --verbose --config ../config_template.xml --id 0 -t 12 -c 10 -r 256 -p 1
+```
