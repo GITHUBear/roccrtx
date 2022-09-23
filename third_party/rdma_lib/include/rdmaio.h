@@ -49,6 +49,9 @@ namespace rdmaio {
       uint32_t rkey;
       uint16_t lid;
       uint64_t qpn;
+      uint64_t subnet_prefix;
+      uint64_t interface_id;
+      uint64_t local_id;
       RdmaQpAttr() { }
   } __attribute__ ((aligned (CACHE_LINE_SZ)));
 
@@ -297,7 +300,7 @@ namespace rdmaio {
 
     //-----------------------------------------------
 
-    static ibv_ah* create_ah(int dlid,int port_index, RdmaDevice* rdma_device);
+    static ibv_ah* create_ah(int dlid,int port_index, RdmaDevice* rdma_device, int subnet = 0, int interface = 0, int local_id = 0);
     void init_conn_recv_qp(int qid);
     void init_dgram_recv_qp(int qid);
 

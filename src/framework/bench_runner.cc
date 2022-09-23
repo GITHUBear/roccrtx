@@ -15,7 +15,7 @@
 
 #include <boost/algorithm/string.hpp>
 
-
+#define MSG_META_SZ 4096
 /* global config constants */
 size_t nthreads = 1;                      // total server threads used
 size_t nclients = 1;                      // total client used
@@ -116,7 +116,7 @@ namespace nocc {
       uint64_t ring_area_sz = 0;
 #if USE_UD_MSG == 0 && USE_TCP_MSG == 0
       // Calculating message size
-      using namespace rdmaio::ringmsg;
+      // using namespace rdmaio::ringmsg;
       ring_padding = MAX_MSG_SIZE;
       total_ring_sz = coroutine_num * (2 * MAX_MSG_SIZE + 2 * 4096)  + ring_padding + MSG_META_SZ; // used for applications
       assert(total_ring_sz < r_buffer_size);

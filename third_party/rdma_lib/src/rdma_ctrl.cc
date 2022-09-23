@@ -404,7 +404,7 @@ namespace rdmaio {
         QPConnArg *argp = (QPConnArg *)(request.data());
         argp->qid = qid;
         argp->sign = MAGIC_NUM;
-        argp->calculate_checksum();
+        // argp->calculate_checksum();
 
         socket.send(request);
 
@@ -464,6 +464,13 @@ namespace rdmaio {
         qp_attr.lid = local_qp->dev_->port_attrs[local_qp->port_id_].lid;
         qp_attr.qpn = local_qp->qp->qp_num;
         //fprintf(stdout,"get local qp costs %lu\n",rdtsc() - begin);
+        ibv_gid gid;
+        int rc = ibv_query_gid(local_qp->dev_->ctx, local_qp->port_id_, 0, &gid);
+        assert(rc == 0);
+        printf("[RdmaCtrl::get_local_qp_attr] sub:%lu interface:%lu local_id:%lu\n", gid.global.subnet_prefix, gid.global.interface_id);
+        qp_attr.subnet_prefix = gid.global.subnet_prefix;
+        qp_attr.interface_id = gid.global.interface_id;
+        qp_attr.local_id = 0;
 
         // calculate the checksum
         uint64_t checksum = ip_checksum((void *)(&(qp_attr.buf)),sizeof(RdmaQpAttr) - sizeof(uint64_t));
@@ -510,7 +517,7 @@ namespace rdmaio {
                 QPConnArg *arg = (QPConnArg *)(request.data());
                 // check that the arg is correct
                 assert(arg->sign = MAGIC_NUM);
-                assert(arg->get_checksum() == arg->checksum);
+                // assert(arg->get_checksum() == arg->checksum);
 
                 uint64_t qid = arg->qid;
                 uint64_t nid = _QP_DECODE_MAC(qid);
@@ -553,13 +560,23 @@ namespace rdmaio {
         printf("[librdma] : recv thread exit!\n");
     }
 
-    ibv_ah* RdmaCtrl::create_ah(int dlid, int port_index, RdmaDevice* rdma_device){
+    ibv_ah* RdmaCtrl::create_ah(int dlid, int port_index, RdmaDevice* rdma_device, int subnet, int interface, int local_id){
         struct ibv_ah_attr ah_attr;
         ah_attr.is_global = 0;
         ah_attr.dlid = dlid;
         ah_attr.sl = 0;
         ah_attr.src_path_bits = 0;
         ah_attr.port_num = port_index;
+
+        if (interface) {
+            printf("[RdmaCtrl::create_ah] global\n");
+            ah_attr.is_global = 1;
+            ah_attr.grh.hop_limit = 255;
+            ah_attr.grh.dgid.global.subnet_prefix = subnet;
+            ah_attr.grh.dgid.global.interface_id = interface;
+            ah_attr.grh.sgid_index = local_id;
+            ah_attr.grh.flow_label = 0;
+        }
 
         struct ibv_ah *ah;
         ah = ibv_create_ah(rdma_device->pd, &ah_attr);

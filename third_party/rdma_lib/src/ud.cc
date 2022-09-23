@@ -64,7 +64,7 @@ namespace rdmaio {
         int dlid = qp_attr.lid;
 
 		//ahs_.insert(std::make_pair(key,RdmaCtrl::create_ah(dlid,port_idx,dev_)));
-        ahs_[key] = RdmaCtrl::create_ah(dlid,port_idx,dev_);
+        ahs_[key] = RdmaCtrl::create_ah(dlid,port_idx,dev_, qp_attr.subnet_prefix, qp_attr.interface_id, qp_attr.local_id);
         //ahs_.insert(key,RdmaCtrl::create_ah(dlid,port_idx,dev_));
 
 		//ud_attrs_.insert(std::make_pair(key,RdmaQpAttr()));
@@ -122,7 +122,7 @@ namespace rdmaio {
 
         int dlid = qp_attr.lid;
 
-		ahs_[remote_id] = RdmaCtrl::create_ah(dlid,port_idx,dev_);
+		ahs_[remote_id] = RdmaCtrl::create_ah(dlid,port_idx,dev_, qp_attr.subnet_prefix, qp_attr.interface_id, qp_attr.local_id);
 		memcpy(&(ud_attrs_[remote_id]),(char *)reply.data() + 1,sizeof(RdmaQpAttr));
 
 		return true;

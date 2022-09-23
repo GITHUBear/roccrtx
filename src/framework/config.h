@@ -5,7 +5,7 @@
 
 // rdma related stuffs
 #define HUGE_PAGE  1
-#define USE_UD_MSG 1
+#define USE_UD_MSG 0
 #define USE_TCP_MSG 0
 #define SINGLE_MR  0
 #define BUF_SIZE   10480 // RDMA buffer size registered, in a small setting

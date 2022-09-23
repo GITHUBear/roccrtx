@@ -7,7 +7,7 @@
 
 // helper functions to change the state of qps  ///////////////////////////////
 static void rc_ready2init(ibv_qp * qp, int port_id);
-static void rc_init2rtr(ibv_qp * qp, int port_id, int qpn, int dlid);
+static void rc_init2rtr(ibv_qp * qp, int port_id, int qpn, int dlid, int subnet_prefix = 0, int interface_id = 0, int local_id = 0);
 static void rc_rtr2rts(ibv_qp * qp);
 
 static void uc_ready2init(ibv_qp * qp, int port_id);
@@ -148,7 +148,8 @@ namespace rdmaio {
 		assert(dev_port_id >= 1);
 
 		if(qp->qp_type == IBV_QPT_RC){
-			rc_init2rtr(qp, dev_port_id, remote_qp_attr->qpn, remote_qp_attr->lid);
+			rc_init2rtr(qp, dev_port_id, remote_qp_attr->qpn, remote_qp_attr->lid, remote_qp_attr->subnet_prefix, 
+						remote_qp_attr->interface_id, remote_qp_attr->local_id);
 			rc_rtr2rts(qp);
 		} else if(qp->qp_type == IBV_QPT_UC){
 			uc_init2rtr(qp, dev_port_id, remote_qp_attr->qpn, remote_qp_attr->lid);
@@ -290,7 +291,7 @@ static void rc_ready2init(ibv_qp * qp, int port_id) {
 	CE_1(rc, "[librdma] qp: Failed to modify RC to INIT state, %s\n", strerror(errno));
 }
 
-static void rc_init2rtr(ibv_qp * qp, int port_id, int qpn, int dlid) {
+static void rc_init2rtr(ibv_qp * qp, int port_id, int qpn, int dlid, int subnet_prefix, int interface_id, int local_id) {
 	int rc, flags;
 	struct ibv_qp_attr qp_attr;
 	memset(&qp_attr, 0, sizeof(struct ibv_qp_attr));
@@ -303,9 +304,20 @@ static void rc_init2rtr(ibv_qp * qp, int port_id, int qpn, int dlid) {
 
 	qp_attr.ah_attr.is_global = 0;
 	qp_attr.ah_attr.dlid = dlid;
+	// qp_attr.ah_attr.grh.dgid = 
 	qp_attr.ah_attr.sl = 0;
 	qp_attr.ah_attr.src_path_bits = 0;
 	qp_attr.ah_attr.port_num = port_id; /* Local port! */
+
+	if (interface_id) {
+		printf("RoCE set GID\n");
+		qp_attr.ah_attr.is_global = 1;
+		qp_attr.ah_attr.grh.hop_limit = 255;
+		qp_attr.ah_attr.grh.dgid.global.subnet_prefix = subnet_prefix;
+        qp_attr.ah_attr.grh.dgid.global.interface_id = interface_id;
+        qp_attr.ah_attr.grh.sgid_index = local_id;
+        qp_attr.ah_attr.grh.flow_label = 0;
+	}
 
 	flags = IBV_QP_STATE | IBV_QP_AV | IBV_QP_PATH_MTU | IBV_QP_DEST_QPN | IBV_QP_RQ_PSN
 		| IBV_QP_MAX_DEST_RD_ATOMIC | IBV_QP_MIN_RNR_TIMER;
